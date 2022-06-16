@@ -6,6 +6,10 @@ Created on Thu Jun 16 14:52:33 2022
 @email: james.osmond@pm.me
 """
 
+import pandas as pd
+import numpy as np
+import re
+
 def import_ONS_time_series(file_path, write_path = None,
 
                            column_name = None, period = 'quarterly',
