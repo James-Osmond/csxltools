@@ -12,7 +12,8 @@ import xlsxwriter
 
  
 
-def write_to_excel(write_path, dataframes, sheet_names = None):
+def write_to_excel(write_path, dataframes, sheet_names = None, 
+                   kwargs_for_ExcelWriter = {}, **kwargs):
 
     """
 
@@ -41,6 +42,16 @@ def write_to_excel(write_path, dataframes, sheet_names = None):
     sheet_names : list, optional
 
         List of sheet names (strings) for the workbook. The default is None.
+        
+    kwargs_for_ExcelWriter : dict, optional
+        
+        Dict object to pass extra argument to pandas.ExcelWriter. The default 
+        
+        is {}.
+        
+    **kwargs
+        
+        Extra options to pass to `pandas.DataFrame.to_excel()` function.
 
  
 
@@ -60,7 +71,7 @@ def write_to_excel(write_path, dataframes, sheet_names = None):
 
     try:
 
-        writer = pd.ExcelWriter(write_path)
+        writer = pd.ExcelWriter(write_path, **kwargs_for_ExcelWriter)
 
         # Sheet names are not specified
 
@@ -72,7 +83,7 @@ def write_to_excel(write_path, dataframes, sheet_names = None):
 
                 for df in dataframes:
 
-                    df.to_excel(writer)
+                    df.to_excel(writer, **kwargs)
 
                 writer.save()
 
@@ -82,7 +93,7 @@ def write_to_excel(write_path, dataframes, sheet_names = None):
 
                 for sheet_name, df in dataframes.items():
 
-                    df.to_excel(writer, sheet_name)
+                    df.to_excel(writer, sheet_name, **kwargs)
 
                 writer.save()
 
@@ -90,7 +101,7 @@ def write_to_excel(write_path, dataframes, sheet_names = None):
 
             else:
 
-                dataframes.to_excel(writer)
+                dataframes.to_excel(writer, **kwargs)
 
                 writer.save()
 
@@ -106,7 +117,7 @@ def write_to_excel(write_path, dataframes, sheet_names = None):
 
             if isinstance(sheet_names, list):
 
-                dataframes.to_excel(writer, sheet_names[0])
+                dataframes.to_excel(writer, sheet_names[0], **kwargs)
 
                 writer.save()
 
@@ -114,7 +125,7 @@ def write_to_excel(write_path, dataframes, sheet_names = None):
 
             else:
 
-                dataframes.to_excel(writer, sheet_names)
+                dataframes.to_excel(writer, sheet_names, **kwargs)
 
                 writer.save()
 
@@ -128,11 +139,11 @@ def write_to_excel(write_path, dataframes, sheet_names = None):
 
                 for df, sheet_name in zip(dataframes, sheet_names):
 
-                    df.to_excel(writer, sheet_name)
+                    df.to_excel(writer, sheet_name, **kwargs)
 
             else:
 
-                dataframes[0].to_excel(writer, sheet_names)
+                dataframes[0].to_excel(writer, sheet_names, **kwargs)
 
             writer.save()
 
@@ -140,10 +151,41 @@ def write_to_excel(write_path, dataframes, sheet_names = None):
 
         print('Could not write to Excel. Check that the worksheet with this '
 
-              f'file path is not in use. {write_path}')
+              f'file path is not in use. ({write_path})')
+            
+        try:
+            
+            writer.close()
+            
+        except:
+            
+            pass
 
  
+def write_to_csv(write_path : str, df, **kwargs):
+    """
+    Saves a pandas DataFrame to a .csv file. If it cannot be saved a warning
+    will be raised.
 
+    Parameters
+    ----------
+    write_path : str
+        File path, ending .csv, to where the DataFrame should be saved.
+    df : pandas DataFrame
+        DataFrame.
+    **kwargs
+        Extra options to pass to `pandas.DataFrame.to_csv()` function.
+        
+    Returns
+    -------
+    None.
+
+    """
+    try:
+        df.to_csv(write_path, **kwargs)
+    except PermissionError:
+        print('Could not write to .csv file. Check that the file is not open.'
+              f' ({write_path})')
  
 
 def produce_chart_download(write_folder, data, figure_number, figure_name,
